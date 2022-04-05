@@ -1,0 +1,54 @@
+---
+title: "Convoy preliminary analysis"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+
+
+```{r}
+#install.packages("rjson")
+#install.packages("dplyr")
+#install.packages("tidyjson")
+
+library("dplyr")
+library("rjson")
+library("tidyjson")
+
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r}
+# Give the input file name to the function.
+
+result <- rjson::fromJSON(file = "data/convoy_pro.jsonl")
+#result <- read_lines_chunked("data/convoy.jsonl", str, chunk_size = 100000)
+
+# Print the result.
+data <- result$data
+
+dataframe <- data %>% spread_all
+
+dataframe
+
+df_days <- dataframe %>%
+  select(start, end, tweet_count) %>%
+  mutate(day =  as.Date(start))
+
+
+df_sums <- aggregate(df_days$tweet_count, by=list(day=df_days$day), FUN=sum)
+
+library("ggplot2")
+ggplot(df_sums, aes(day, x)) + geom_line()
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
